@@ -11,3 +11,16 @@
 配置本地账号
 
 ![Jietu20201031-091520.gif](https://i.loli.net/2020/10/31/qnf16w4MaomLpeG.gif)
+
+# build
+
+目前只在`macos`中测试
+
+```
+chmod u+x build.sh
+./build.sh
+```
+
+# Author
+
+chenhonzhou@gmail.com
