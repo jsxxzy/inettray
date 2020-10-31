@@ -1,1 +1,1 @@
-go build -o build/inet.exe .
+go build -o build/inet.exe -ldflags "-H=windowsgui" .
