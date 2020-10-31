@@ -12,14 +12,19 @@
 
 ![Jietu20201031-091520.gif](https://i.loli.net/2020/10/31/qnf16w4MaomLpeG.gif)
 
-# build
-
-目前只在`macos`中测试
+# release
 
 ```
 chmod u+x build.sh
 ./build.sh
 ```
+
+`mac` 下载地址
+
+https://d1y.lanzoui.com/ievhvhwi1ha
+密码:cjk5
+
+![图片.png](https://i.loli.net/2020/10/31/CfAl69aFswGIJr5.png)
 
 # Author
 
