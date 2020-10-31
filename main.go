@@ -36,7 +36,7 @@ func onReady() {
 	systray.SetIcon(icon.Data)
 
 	systray.SetTooltip(config.MainTitleTip)
-	systray.SetTitle(config.AppName)
+	// systray.SetTitle(config.AppName)
 	loginButton := systray.AddMenuItem(noLoginText, config.LoginTip)
 
 	reloadInfoButton := loginButton.AddSubMenuItem("刷新信息", "获取使用信息")

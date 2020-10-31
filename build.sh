@@ -11,6 +11,9 @@
 
 cd build
 
+rm -rf *
+rm -rf /Applications/inet.app
+
 go build -o inet ..
 
 yy -name "inet" -icon ../icon/icon_1024.png inet
