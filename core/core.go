@@ -9,6 +9,7 @@ import (
 	"math"
 	"strconv"
 
+	"github.com/atotto/clipboard"
 	"github.com/jsxxzy/inet"
 	"github.com/jsxxzy/inettray/core/config"
 	"github.com/pkg/browser"
@@ -53,7 +54,14 @@ func getHumanTime(h int) string {
 // getHumanFlow 转换流量格式转为阳间格式
 //
 // https://gist.github.com/anikitenko/b41206a49727b83a530142c76b1cb82d
+//
+// error: https://stackoverflow.com/a/26129063
 func getHumanFlow(f float64) string {
+	defer func() {
+		if err := recover(); err != nil {
+			return
+		}
+	}()
 	size := f * 1024 * 1024 // This is in bytes
 	suffixes[0] = "B"
 	suffixes[1] = "KB"
@@ -78,12 +86,15 @@ type Info struct {
 // GetInfo 获取数据
 func GetInfo() (Info, error) {
 	info, err := inet.QueryInfo()
-	if err != nil {
+	if err != nil || info.Error() != nil {
 		return Info{}, errors.New("查询信息失败")
 	}
 	xTime, _ := strconv.Atoi(info.Time)
 	var time = getHumanTime(xTime)
 	var flow = getHumanFlow(info.Flow)
+	if len(flow) == 0 {
+		flow = "0kb"
+	}
 	return Info{
 		Time: time,
 		Flow: flow,
@@ -128,4 +139,9 @@ func Login() error {
 // Logout 注销
 func Logout() error {
 	return inet.Logout()
+}
+
+// SetClipboard 设置剪贴板
+func SetClipboard(text string) error {
+	return clipboard.WriteAll(text)
 }
