@@ -7,6 +7,8 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"os/exec"
+	"runtime"
 	"strconv"
 
 	"github.com/atotto/clipboard"
@@ -109,7 +111,12 @@ func OpenHelp() error {
 
 // OpenConfig 打开配置文件
 func OpenConfig() error {
-	return browser.OpenFile(config.ConfigFile)
+	if runtime.GOOS == "windows" {
+		tmpRun := exec.Command("notepad", config.ConfigFile)
+		return tmpRun.Run()
+	} else {
+		return browser.OpenFile(config.ConfigFile)
+	}
 }
 
 // EasyGetLocalAuthUsername 用最简单的方法获取用户名

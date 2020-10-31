@@ -5,6 +5,7 @@ package main
 
 import (
 	"fmt"
+	"runtime"
 
 	"github.com/getlantern/systray"
 	"github.com/jsxxzy/inettray/core"
@@ -20,6 +21,13 @@ func main() {
 	systray.Run(onReady, onExit)
 }
 
+var windows = false
+
+// 判断是否为 `windows` 系统
+func isWindows() bool {
+	return runtime.GOOS == "windows"
+}
+
 func onReady() {
 
 	tmpData, tmpErr := core.GetInfo()
@@ -32,6 +40,12 @@ func onReady() {
 	loginButton := systray.AddMenuItem(noLoginText, config.LoginTip)
 
 	reloadInfoButton := loginButton.AddSubMenuItem("刷新信息", "获取使用信息")
+
+	wnidowsLoginButton := loginButton.AddSubMenuItem("登录", "")
+
+	if !windows || tmpErr == nil {
+		wnidowsLoginButton.Hide()
+	}
 
 	// ip
 	ipv4 := loginButton.AddSubMenuItem("内网ip", "单击可复制ipv4地址")
@@ -57,6 +71,12 @@ func onReady() {
 	currUser.Disable()
 
 	reloadUser := confButton.AddSubMenuItem("刷新本地用户", "刷新本地用户")
+
+	openConfigCopy := confButton.AddSubMenuItem("打开配置文件", "打开配置文件")
+
+	if !windows {
+		openConfigCopy.Hide()
+	}
 
 	helpButton := systray.AddMenuItem("帮助", config.HelpTip)
 	mQuit := systray.AddMenuItem("退出", config.ExitTip)
@@ -94,8 +114,25 @@ func onReady() {
 				currUser.SetTitle(username)
 			case <-helpButton.ClickedCh: // 帮助
 				core.OpenHelp()
+			case <-openConfigCopy.ClickedCh:
+				core.OpenConfig()
 			case <-confButton.ClickedCh: // 配置
 				core.OpenConfig()
+
+			case <-wnidowsLoginButton.ClickedCh: // 登录
+				// TODO: 重复代码
+				if err := core.Login(); err != nil {
+					fmt.Println(err.Error())
+				} else {
+					tmpData, tmpErr := core.GetInfo()
+					if tmpErr == nil && tmpData.Time != "0" {
+						ipv4.SetTitle(tmpData.Ipv4)
+						flow.SetTitle(tmpData.Flow)
+						duration.SetTitle(tmpData.Time)
+						loginButton.SetTitle(loginText)
+					}
+					wnidowsLoginButton.Hide()
+				}
 			case <-loginButton.ClickedCh: // 登录
 				if err := core.Login(); err != nil {
 					fmt.Println(err.Error())
@@ -115,6 +152,9 @@ func onReady() {
 					flow.SetTitle("流量")
 					duration.SetTitle("使用时长")
 					loginButton.SetTitle(noLoginText)
+					if windows {
+						wnidowsLoginButton.Show()
+					}
 				}
 			}
 		}
@@ -126,4 +166,8 @@ func onReady() {
 
 func onExit() {
 	// clean up here
+}
+
+func init() {
+	windows = isWindows()
 }
