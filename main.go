@@ -101,6 +101,9 @@ func onReady() {
 				data, err := core.GetInfo()
 				if err != nil {
 					loginButton.SetTitle(noLoginText)
+					ipv4.SetTitle("内网ip")
+					flow.SetTitle("流量")
+					duration.SetTitle("使用时长")
 					ipv4copy = ""
 				} else {
 					loginButton.SetTitle(loginText)
