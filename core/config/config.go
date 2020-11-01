@@ -42,6 +42,15 @@ var ConfigFile = ""
 
 var configFileName = ".inet.conf"
 
+// 流量本地持久化文件名..
+var flowFileName = ".inetflow"
+
+// FlowFilePath 流量文件路径
+var FlowFilePath = ""
+
+// FlowFile 流量文件句柄
+var FlowFile *os.File
+
 // Auth 鉴权
 type Auth struct {
 	// Username 账号
@@ -103,5 +112,11 @@ func init() {
 		panic(err)
 	}
 	ConfigFile = filepath.Join(homeDir, configFileName)
+	FlowFilePath = filepath.Join(homeDir, flowFileName)
 	initConfigFile()
+	if !exists(FlowFilePath) {
+		FlowFile, _ = os.Create(FlowFilePath)
+	} else {
+		FlowFile, _ = os.Open(FlowFilePath)
+	}
 }

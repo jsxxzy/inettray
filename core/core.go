@@ -6,12 +6,15 @@ package core
 import (
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"math"
+	"os"
 	"os/exec"
 	"runtime"
 	"strconv"
 
 	"github.com/atotto/clipboard"
+	"github.com/jinzhu/now"
 	"github.com/jsxxzy/inet"
 	"github.com/jsxxzy/inettray/core/config"
 	"github.com/pkg/browser"
@@ -80,9 +83,10 @@ func getHumanFlow(f float64) string {
 
 // Info 数据
 type Info struct {
-	Time string
-	Flow string
-	Ipv4 string
+	Time   string
+	Flow   string
+	FlowMB float64
+	Ipv4   string
 }
 
 // GetInfo 获取数据
@@ -98,9 +102,10 @@ func GetInfo() (Info, error) {
 		flow = "0kb"
 	}
 	return Info{
-		Time: time,
-		Flow: flow,
-		Ipv4: info.V4ip,
+		Time:   time,
+		Flow:   flow,
+		FlowMB: info.Flow,
+		Ipv4:   info.V4ip,
 	}, nil
 }
 
@@ -114,9 +119,8 @@ func OpenConfig() error {
 	if runtime.GOOS == "windows" {
 		tmpRun := exec.Command("notepad", config.ConfigFile)
 		return tmpRun.Run()
-	} else {
-		return browser.OpenFile(config.ConfigFile)
 	}
+	return browser.OpenFile(config.ConfigFile)
 }
 
 // EasyGetLocalAuthUsername 用最简单的方法获取用户名
@@ -151,4 +155,110 @@ func Logout() error {
 // SetClipboard 设置剪贴板
 func SetClipboard(text string) error {
 	return clipboard.WriteAll(text)
+}
+
+// FlowConfigFile 流量文件结构体
+type FlowConfigFile struct {
+	file *os.File
+}
+
+// Get 获取流量
+func (ff *FlowConfigFile) Get() (float64, error) {
+	byteData, err := ioutil.ReadFile(ff.file.Name())
+	if err != nil {
+		return 0, err
+	}
+	var s = string(byteData)
+	byteFloat, err := strconv.ParseFloat(s, 64)
+	if err != nil {
+		return 0, err
+	}
+	return byteFloat, nil
+}
+
+// Clean 清零
+//
+// 如果到了月底就要清零一次流量
+//
+// TODO: 可能以后会做几个月加在一起吧
+//
+// (估计不会做的这么简单吧)
+//
+func (ff *FlowConfigFile) Clean() error {
+	var zeroValue float64 = 0
+	return ff.Write(zeroValue)
+}
+
+// 写入流量操作
+func (ff *FlowConfigFile) Write(flow float64) error {
+	var value = fmt.Sprintf("%f", flow)
+	var err = ioutil.WriteFile(ff.file.Name(), []byte(value), 0777)
+	return err
+}
+
+// Add 添加流量
+func (ff *FlowConfigFile) Add(val float64) (float64, error) {
+	var flow, err = ff.Get()
+	if err != nil {
+		return val, err
+	}
+	var outputValue = flow + val
+	return val, ff.Write(outputValue)
+}
+
+// GetHumanMonthTotalFlow 获取本月共用了多少流量
+func GetHumanMonthTotalFlow() string {
+	vendor := FlowConfigFile{
+		file: config.FlowFile,
+	}
+	f, e := vendor.Get()
+	if e != nil || f == 0 {
+		fmt.Println(e)
+		return "0kb"
+	}
+	var s = getHumanFlow(f)
+	return s
+}
+
+// SetLocalMonthTotalFlow 设置本月使用总流量
+//
+// 获取文件修改时间: https://blog.csdn.net/liangguangchuan/article/details/78952979
+//
+// 获取每个月的第一天: https://www.coder.work/article/25353
+//
+func SetLocalMonthTotalFlow(timeLessFlow float64) (float64, error) {
+
+	// fmt.Println("1. 创建文件句柄")
+	var vendor = FlowConfigFile{
+		file: config.FlowFile,
+	}
+
+	// fmt.Println("2. 获取文件句柄")
+	flowFileInfo, err := os.Stat(config.ConfigFile)
+	if err != nil {
+		return 0, err
+	}
+	// fmt.Println("3. 比对时间")
+	var changeTime = flowFileInfo.ModTime().Unix()
+	var startTime = now.BeginningOfMonth().Unix()
+	var curr = now.BeginningOfDay()
+	var currday = curr.Unix()
+	var nextDay = curr.AddDate(0, 0, 1).Unix()
+
+	var pushFlow = timeLessFlow
+
+	if currday == startTime {
+		// fmt.Println("当前为本月第一天")
+		if changeTime <= nextDay {
+			// fmt.Println("文件修改在当天, 不需要清零")
+		} else {
+			vendor.Clean()
+			pushFlow = 0
+			// fmt.Println("文件写入的时间为上月, 需要清零")
+		}
+	}
+
+	// fmt.Println("4. 增加流量")
+
+	return vendor.Add(pushFlow)
 }

@@ -54,8 +54,18 @@ func onReady() {
 	// 使用时长
 	duration := loginButton.AddSubMenuItem("使用时长", "使用时长")
 
+	monthFlow := loginButton.AddSubMenuItem("本月已用", "本月已用")
+
+	monthFlow.Disable()
+
+	var flowCopy float64 = 0
+
 	if tmpErr == nil {
 		ipv4.SetTitle(tmpData.Ipv4)
+		flowCopy = tmpData.FlowMB
+		var f = core.GetHumanMonthTotalFlow()
+		var s = fmt.Sprintf("本月已用: %v", f)
+		monthFlow.SetTitle(s)
 		flow.SetTitle(tmpData.Flow)
 		duration.SetTitle(tmpData.Time)
 		loginButton.SetTitle(loginText)
@@ -93,6 +103,10 @@ func onReady() {
 	go func() {
 		for {
 			select {
+			case <-monthFlow.ClickedCh: // 本月已用
+				var f = core.GetHumanMonthTotalFlow()
+				var s = fmt.Sprintf("本月已用: %v", f)
+				monthFlow.SetTitle(s)
 			case <-ipv4.ClickedCh: // ipv4
 				if len(ipv4copy) >= 1 {
 					core.SetClipboard(ipv4copy)
@@ -104,13 +118,18 @@ func onReady() {
 					ipv4.SetTitle("内网ip")
 					flow.SetTitle("流量")
 					duration.SetTitle("使用时长")
+					flowCopy = 0
 					ipv4copy = ""
 				} else {
 					loginButton.SetTitle(loginText)
 					ipv4.SetTitle(data.Ipv4)
 					ipv4copy = data.Ipv4
+					flowCopy = data.FlowMB
 					flow.SetTitle(data.Flow)
 					duration.SetTitle(data.Time)
+					var f = core.GetHumanMonthTotalFlow()
+					var s = fmt.Sprintf("本月已用: %v", f)
+					monthFlow.SetTitle(s)
 				}
 			case <-reloadUser.ClickedCh: // 获取本地用户
 				var username = core.EasyGetLocalAuthUsername()
@@ -129,6 +148,8 @@ func onReady() {
 				} else {
 					tmpData, tmpErr := core.GetInfo()
 					if tmpErr == nil && tmpData.Time != "0" {
+						flowCopy = tmpData.FlowMB
+						ipv4copy = tmpData.Ipv4
 						ipv4.SetTitle(tmpData.Ipv4)
 						flow.SetTitle(tmpData.Flow)
 						duration.SetTitle(tmpData.Time)
@@ -142,6 +163,8 @@ func onReady() {
 				} else {
 					tmpData, tmpErr := core.GetInfo()
 					if tmpErr == nil && tmpData.Time != "0" {
+						flowCopy = tmpData.FlowMB
+						ipv4copy = tmpData.Ipv4
 						ipv4.SetTitle(tmpData.Ipv4)
 						flow.SetTitle(tmpData.Flow)
 						duration.SetTitle(tmpData.Time)
@@ -152,6 +175,10 @@ func onReady() {
 				if core.Logout() == nil {
 					ipv4.SetTitle("内网ip")
 					ipv4copy = ""
+					core.SetLocalMonthTotalFlow(flowCopy)
+					flowCopy = 0
+					var fm = fmt.Sprintf("本月已用: %v", core.GetHumanMonthTotalFlow())
+					monthFlow.SetTitle(fm)
 					flow.SetTitle("流量")
 					duration.SetTitle("使用时长")
 					loginButton.SetTitle(noLoginText)
