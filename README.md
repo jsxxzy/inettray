@@ -43,7 +43,9 @@ chenhonzhou@gmail.com
 
 - 2020-11-0
 
-  已登录(彩色图标) => 未登录(灰色图标), 只支持 `macos`
+  1. 只允许单例程序运行, 不允许多开
+
+  2. 已登录(彩色图标) => 未登录(灰色图标), 只支持 `macos`
 
 ![Jietu20201102-201041.png](https://i.loli.net/2020/11/02/6ZWmxbSOFglyspw.png)
 
