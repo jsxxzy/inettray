@@ -67,11 +67,25 @@ func (tray *Tray) SetMenuTitle(title string) {
 
 // SetMenuLoginFlag 设置菜单登录
 func (tray *Tray) SetMenuLoginFlag(flag bool) {
-	var s = noLoginText
+	var s = "未登录"
 	if flag {
 		s = loginText
 	}
+	tray.SetMenuIconFlag(flag)
 	systray.SetTitle(s)
+}
+
+// SetMenuIconFlag 设置主菜单图标(灰色/彩色)
+func (tray *Tray) SetMenuIconFlag(flag bool) {
+	// TODO 图标适配windows
+	if windows {
+		return
+	}
+	var i = icon.GrayData
+	if flag {
+		i = icon.RainbowData
+	}
+	systray.SetIcon(i)
 }
 
 // SetInfo 设置信息
@@ -86,6 +100,7 @@ func (tray *Tray) SetInfo() error {
 		tray.Login.SetTitle(loginText)
 		tray.SetMonthTotalFlowTitle()
 		tray.SetWindowsLoginButtonFlag(false)
+		tray.SetMenuLoginFlag(true)
 		return nil
 	}
 	return tray.SetInfoZero()
@@ -100,6 +115,7 @@ func (tray *Tray) SetInfoZero() error {
 	tray.SetFlowMB(0)
 	tray.SetIpv4("")
 	tray.SetMonthTotalFlowTitle()
+	tray.SetMenuLoginFlag(false)
 	return nil
 }
 
@@ -169,6 +185,7 @@ func (tray *Tray) LogoutWith() {
 		core.SetLocalMonthTotalFlow(f)
 		tray.SetMonthTotalFlowTitle()
 		tray.SetInfoZero()
+		tray.SetMenuLoginFlag(false)
 		if windows {
 			tray.SetWindowsLoginButtonFlag(true)
 		}
@@ -187,7 +204,13 @@ func (tray *Tray) InitDisableMenu() {
 func (tray *Tray) Init() {
 	tray.InitDisableMenu()
 
-	tray.SetMenuIcon(icon.Data)
+	var data = icon.Data
+
+	if !windows {
+		data = icon.RainbowData
+	}
+
+	tray.SetMenuIcon(data)
 	tray.SetMenuToolTip(config.MainTitleTip)
 
 	tray.SetInfo()
