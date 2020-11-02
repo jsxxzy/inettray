@@ -19,6 +19,8 @@ chmod u+x build.sh
 ./build.sh
 ```
 
+### ==> 以下下载的为旧版本, 请自行编译!!!
+
 `mac` 下载地址
 
 https://d1y.lanzoui.com/ievhvhwi1ha
@@ -36,3 +38,18 @@ https://d1y.lanzoui.com/i518Shwia9g
 # Author
 
 chenhonzhou@gmail.com
+
+# Changelog
+
+- 2020-11-0
+
+  已登录(彩色图标) => 未登录(灰色图标), 只支持 `macos`
+
+![Jietu20201102-201041.png](https://i.loli.net/2020/11/02/6ZWmxbSOFglyspw.png)
+
+
+- 2020-10-31
+
+  添加`本月已用`
+
+![Jietu20201102-200820.png](https://i.loli.net/2020/11/02/Qv9IUeTgMYypZwL.png)
