@@ -5,14 +5,25 @@ package main
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/getlantern/systray"
 	"github.com/jsxxzy/inettray/core"
 	"github.com/jsxxzy/inettray/core/config"
 	"github.com/jsxxzy/inettray/core/tray"
+	"github.com/jsxxzy/lockfile"
 )
 
 func main() {
+	singleApp, code, _ := lockfile.NewSingleApp("inet")
+	if code == lockfile.AppRunOtherProcess {
+		fmt.Println("[inet] 只允许启动一个进程")
+		return
+	}
+	singleApp.Free(func() {
+		fmt.Println("[inet] 已退出程序")
+		os.Exit(0)
+	})
 	systray.Run(onReady, onExit)
 }
 

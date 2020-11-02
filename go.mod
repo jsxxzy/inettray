@@ -7,5 +7,6 @@ require (
 	github.com/getlantern/systray v1.0.5
 	github.com/jinzhu/now v1.1.1
 	github.com/jsxxzy/inet v0.0.0-20201030112540-6e423071b2f5
+	github.com/jsxxzy/lockfile v0.0.0-20201102024235-9370028a16c7
 	github.com/pkg/browser v0.0.0-20180916011732-0a3d74bf9ce4
 )
