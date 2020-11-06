@@ -12,6 +12,7 @@ import (
 	"os/exec"
 	"runtime"
 	"strconv"
+	"strings"
 
 	"github.com/atotto/clipboard"
 	"github.com/jinzhu/now"
@@ -169,6 +170,7 @@ func (ff *FlowConfigFile) Get() (float64, error) {
 		return 0, err
 	}
 	var s = string(byteData)
+	s = strings.TrimSuffix(s, "\n")
 	byteFloat, err := strconv.ParseFloat(s, 64)
 	if err != nil {
 		return 0, err
